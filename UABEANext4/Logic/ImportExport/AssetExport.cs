@@ -99,8 +99,8 @@ public class AssetExport
                     value = evt switch
                     {
                         AssetValueType.Bool => Invariant($" = {(field.AsBool ? "true" : "false")}"),
-                        AssetValueType.Int8 => Invariant($" = {field.AsByte}"),
-                        AssetValueType.UInt8 => Invariant($" = {field.AsSByte}"),
+                        AssetValueType.Int8 => Invariant($" = {field.AsSByte}"),
+                        AssetValueType.UInt8 => Invariant($" = {field.AsByte}"),
                         AssetValueType.Int16 => Invariant($" = {field.AsShort}"),
                         AssetValueType.UInt16 => Invariant($" = {field.AsUShort}"),
                         AssetValueType.Int32 => Invariant($" = {field.AsInt}"),
