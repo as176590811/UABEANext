@@ -94,9 +94,23 @@ public class AssetExport
                     var fixedStr = TextDumpEscapeString(field.AsString);
                     value = $" = \"{fixedStr}\"";
                 }
-                else if (1 <= (int)evt && (int)evt <= 12)
+                else
                 {
-                    value = Invariant($" = {field.AsString}");
+                    value = evt switch
+                    {
+                        AssetValueType.Bool => Invariant($" = {(field.AsBool ? "true" : "false")}"),
+                        AssetValueType.Int8 => Invariant($" = {field.AsByte}"),
+                        AssetValueType.UInt8 => Invariant($" = {field.AsSByte}"),
+                        AssetValueType.Int16 => Invariant($" = {field.AsShort}"),
+                        AssetValueType.UInt16 => Invariant($" = {field.AsUShort}"),
+                        AssetValueType.Int32 => Invariant($" = {field.AsInt}"),
+                        AssetValueType.UInt32 => Invariant($" = {field.AsUInt}"),
+                        AssetValueType.Int64 => Invariant($" = {field.AsLong}"),
+                        AssetValueType.UInt64 => Invariant($" = {field.AsULong}"),
+                        AssetValueType.Float => Invariant($" = {field.AsFloat}"),
+                        AssetValueType.Double => Invariant($" = {field.AsDouble}"),
+                        _ => value,
+                    };
                 }
             }
             _streamWriter.WriteLine(Invariant($"{new string(' ', depth)}{align} {typeName} {fieldName}{value}"));
