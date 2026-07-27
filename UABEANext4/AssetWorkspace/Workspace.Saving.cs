@@ -139,7 +139,7 @@ public partial class Workspace
         }
     }
 
-    public async Task<(bool saved, bool failed)> Save(WorkspaceItem item)
+    public async Task<(bool saved, bool failed)> Save(WorkspaceItem item, bool compressSave = false)
     {
         if (!UnsavedItems.Contains(item))
         {
@@ -212,9 +212,36 @@ public partial class Workspace
         // technically there's a window here where the file could be reopened
         // and block write access, but let's just assume that won't happen
         // since that complicates things a bit...
+
+        var finalTempPath = tempWriteStreamPath;
+        string? compTempPath = null;
+        if (compressSave && type == WorkspaceItemType.BundleFile && item.Object is BundleFileInstance origBunInst)
+        {
+            compTempPath = tempWriteStreamPath + ".comp";
+            try
+            {
+                using var uncompStream = File.Open(tempWriteStreamPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var compTempStream = File.Open(compTempPath, FileMode.Create, FileAccess.Write, FileShare.None);
+
+                var compBundle = new AssetBundleFile();
+                compBundle.Read(new AssetsFileReader(uncompStream));
+                compBundle.Pack(new AssetsFileWriter(compTempStream), origBunInst.originalCompression, true, null);
+            }
+            catch (Exception ex)
+            {
+                File.Delete(tempWriteStreamPath);
+                File.Delete(compTempPath);
+                await MessageBoxUtil.ShowDialog("Error saving", "Failed to compress bundle:\n" + ex);
+                return (false, true);
+            }
+
+            File.Delete(tempWriteStreamPath);
+            finalTempPath = compTempPath;
+        }
+
         try
         {
-            File.Move(tempWriteStreamPath, origBundlePath, true);
+            File.Move(finalTempPath, origBundlePath, true);
             var newStream = File.Open(origBundlePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             if (item.Object is AssetsFileInstance fileInst)
             {
@@ -251,7 +278,7 @@ public partial class Workspace
                             }
 
                             var newFileInst = (AssetsFileInstance)afileObj.Object;
-                            
+
                             var newFile = newFileInst.file;
                             childInst.file = newFile;
                             foreach (var asset in newFile.AssetInfos)

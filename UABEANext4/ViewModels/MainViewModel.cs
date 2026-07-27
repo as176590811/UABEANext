@@ -394,6 +394,8 @@ public partial class MainViewModel : ViewModelBase
 
     private async Task DoSaveOverwrite(IEnumerable<WorkspaceItem> items)
     {
+        var compressSave = ConfigurationManager.Settings.CompressBundlesOnSave;
+
         Workspace.ModifyMutex.WaitOne();
         try
         {
@@ -412,7 +414,7 @@ public partial class MainViewModel : ViewModelBase
             var someFailed = false;
             foreach (var item in rootItems)
             {
-                var (saved, failed) = await Workspace.Save(item);
+                var (saved, failed) = await Workspace.Save(item, compressSave);
                 if (failed)
                 {
                     someFailed = true;

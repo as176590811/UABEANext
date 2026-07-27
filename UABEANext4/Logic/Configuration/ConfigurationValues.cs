@@ -26,6 +26,11 @@ public partial class ConfigurationValues : ObservableObject
     private int _listingNameLength = 300;
 
     [ObservableProperty]
+    [property: ConfigTitle("Save with compression")]
+    [property: ConfigDesc("Bundles will compress with the original compression type on any save.")]
+    private bool _compressBundlesOnSave = false;
+
+    [ObservableProperty]
     [property: ConfigTitle("Export Filename Length Limit")]
     [property: ConfigDesc("Maximum length for the asset name when exporting assets.")]
     [property: ConfigRange(0, int.MaxValue)]
